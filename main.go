@@ -17,6 +17,16 @@ func (Restaurant) TableName() string  {
 	return "restaurants" // table name
 }
 
+// Trường hợp muốn update 1 filed nào đó về nil ~~ "" thì bắt buộc phải dùng con trỏ *,&
+type RestaurantUpdate struct {
+	Name *string `json:"name" gorm:"column:name"`
+	Addr *string `json:"addr" gorm:"column:addr"`
+}
+
+func (RestaurantUpdate) TableName() string  {
+	return Restaurant{}.TableName() // table name
+}
+
 func main()  {
 	dsn := os.Getenv("MYSQL_CONN_STRING") // database connection string
 
@@ -52,6 +62,13 @@ func main()  {
 	}
 	log.Println(restaurants)
 
+	// ----------------------------Update name = nil ~~ ""--------------------------------
+	newName := "ThanhRain"
+	updateData := RestaurantUpdate{Name: &newName}
+	if err := db.Where("id = ?", 3).Updates(&updateData).Error; err!= nil {
+		log.Println(err)
+	}
+	log.Println(restaurants)
 	// ----------------------------Delete--------------------------------
 	if err := db.Table(Restaurant{}.TableName()).Where("id =?", 1).Delete(nil).Error; err!= nil {
         log.Println(err)
