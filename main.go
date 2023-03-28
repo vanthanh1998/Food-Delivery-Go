@@ -1,6 +1,7 @@
 package main
 
 import (
+	"Food-Delivery/module/restaurant/transport/ginrestaurant"
 	"github.com/gin-gonic/gin"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -11,12 +12,12 @@ import (
 )
 
 type Restaurant struct {
-	Id int `json:"id" gorm:"column:id"` // id of the restaurant
+	Id   int    `json:"id" gorm:"column:id"`     // id of the restaurant
 	Name string `json:"name" gorm:"column:name"` // TODO
 	Addr string `json:"addr" gorm:"column:addr"` // address
 }
 
-func (Restaurant) TableName() string  {
+func (Restaurant) TableName() string {
 	return "restaurants" // table name
 }
 
@@ -26,11 +27,11 @@ type RestaurantUpdate struct {
 	Addr *string `json:"addr" gorm:"column:addr"`
 }
 
-func (RestaurantUpdate) TableName() string  {
+func (RestaurantUpdate) TableName() string {
 	return Restaurant{}.TableName() // table name
 }
 
-func main()  {
+func main() {
 	dsn := os.Getenv("MYSQL_CONN_STRING") // database connection string
 
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{}) // database connection
@@ -52,21 +53,7 @@ func main()  {
 
 	restaurants := v1.Group("/restaurants")
 
-	restaurants.POST("", func(c *gin.Context) {
-		var data Restaurant
-
-		if err := c.ShouldBind(&data); err != nil {
-			// ShouldBind: dùng để đọc và gán giá trị từ các request parameter vào các struct
-			c.JSON(http.StatusBadRequest, gin.H{
-				"error": err.Error(),
-			})
-			return
-		}
-		db.Create(&data)
-		c.JSON(http.StatusOK, gin.H{
-			"data" : data,
-		})
-	})
+	restaurants.POST("", ginrestaurant.CreateRestaurant(db))
 
 	// get by id
 	restaurants.GET("/:id", func(c *gin.Context) {
@@ -74,15 +61,15 @@ func main()  {
 		id, err := strconv.Atoi(c.Param("id")) // Atoi: chuyển đổi một chuỗi số sang dạng số nguyên (int)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{
-                "error": err.Error(),
-            })
-            return
+				"error": err.Error(),
+			})
+			return
 		}
 		var data Restaurant
 
 		db.Where("id = ?", id).First(&data)
 		c.JSON(http.StatusOK, gin.H{
-			"data" : data,
+			"data": data,
 		})
 	})
 
@@ -92,11 +79,11 @@ func main()  {
 
 		// pagging data
 		type Paging struct {
-			Page int `json:"page" form:"page"`
-		    Limit int `json:"limit" form:"limit"`
-        }
+			Page  int `json:"page" form:"page"`
+			Limit int `json:"limit" form:"limit"`
+		}
 
-        var pagingData Paging
+		var pagingData Paging
 
 		if err := c.ShouldBind(&pagingData); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{
@@ -109,16 +96,16 @@ func main()  {
 			pagingData.Page = 1
 		}
 		if pagingData.Limit <= 0 {
-            pagingData.Limit = 5
-        }
+			pagingData.Limit = 5
+		}
 
-		db.Offset((pagingData.Page - 1 ) * pagingData.Limit).
+		db.Offset((pagingData.Page - 1) * pagingData.Limit).
 			Order("id desc").
 			Limit(pagingData.Limit).
 			Find(&data)
 
 		c.JSON(http.StatusOK, gin.H{
-			"data" : data,
+			"data": data,
 		})
 	})
 
@@ -145,27 +132,12 @@ func main()  {
 		db.Where("id = ?", id).Updates(&data)
 		c.JSON(http.StatusOK, gin.H{
 			"status": 1,
-			"data" : data,
+			"data":   data,
 		})
 	})
 
 	// delete by id
-	restaurants.DELETE("/:id", func(c *gin.Context) {
-		// get id use c.Params
-		id, err := strconv.Atoi(c.Param("id")) // Atoi: chuyển đổi một chuỗi số sang dạng số nguyên (int)
-		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{
-				"error": err.Error(),
-			})
-			return
-		}
-
-		db.Table(Restaurant{}.TableName()).Where("id = ?", id).Delete(nil)
-		c.JSON(http.StatusOK, gin.H{
-			"data" : "Delete successful",
-		})
-	})
-
+	restaurants.DELETE("/:id", ginrestaurant.DeleteRestaurant(db))
 
 	r.Run() // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
 
@@ -182,13 +154,13 @@ func main()  {
 
 	// ----------------------------Read--------------------------------
 	//var restaurants Restaurant
-    //if err := db.Where("id = ?", 6).Find(&restaurants).Error; err!= nil {
-    //    log.Println(err)
-    //}
+	//if err := db.Where("id = ?", 6).Find(&restaurants).Error; err!= nil {
+	//    log.Println(err)
+	//}
 	//
-    //log.Println(restaurants)
+	//log.Println(restaurants)
 	//
-    //// ----------------------------Update--------------------------------
+	//// ----------------------------Update--------------------------------
 	//restaurants.Name = "Megumi Fushigoro"
 	//if err := db.Where("id = ?", 6).Updates(&restaurants).Error; err!= nil {
 	//	log.Println(err)
@@ -204,7 +176,7 @@ func main()  {
 	//log.Println(restaurants)
 	//// ----------------------------Delete--------------------------------
 	//if err := db.Table(Restaurant{}.TableName()).Where("id =?", 1).Delete(nil).Error; err!= nil {
-    //    log.Println(err)
-    //}
-    //log.Println(restaurants)
+	//    log.Println(err)
+	//}
+	//log.Println(restaurants)
 }
