@@ -25,13 +25,13 @@ func DeleteRestaurant(db *gorm.DB) gin.HandlerFunc { // gin.HandlerFunc ~~ c *gi
 
 		if err := biz.DeleteRestaurant(c.Request.Context(), id); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{
-				"error":     err.Error(),
-				"thanhrain": "cmm",
+				"error": err.Error(),
 			})
-		} else {
-			c.JSON(http.StatusOK, gin.H{
-				"data": 1,
-			})
+			return
 		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"data": 1,
+		})
 	}
 }

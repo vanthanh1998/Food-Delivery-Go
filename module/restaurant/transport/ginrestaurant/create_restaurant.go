@@ -28,12 +28,13 @@ func CreateRestaurant(db *gorm.DB) gin.HandlerFunc { // gin.HandlerFunc ~~ c *gi
 			c.JSON(http.StatusBadRequest, gin.H{
 				"error": err.Error(),
 			})
-		} else {
-			c.JSON(http.StatusOK, gin.H{
-				"data": data,
-			})
+			return
 		}
 		// ---- end ----
+
+		c.JSON(http.StatusOK, gin.H{
+			"data": data,
+		})
 
 	}
 }
