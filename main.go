@@ -1,6 +1,7 @@
 package main
 
 import (
+	"Food-Delivery/component/appctx"
 	"Food-Delivery/module/restaurant/transport/ginrestaurant"
 	"github.com/gin-gonic/gin"
 	"gorm.io/driver/mysql"
@@ -40,7 +41,7 @@ func main() {
 		log.Fatalln(err)
 	}
 
-	log.Println(db)
+	db = db.Debug()
 
 	r := gin.Default() // server connection
 	r.GET("/ping", func(c *gin.Context) {
@@ -48,17 +49,20 @@ func main() {
 			"message": "pong",
 		})
 	})
+
+	appContext := appctx.NewAppContext(db)
+
 	// POST restaurant
 	v1 := r.Group("/v1")
 
 	restaurants := v1.Group("/restaurants")
 
-	restaurants.POST("", ginrestaurant.CreateRestaurant(db))
+	restaurants.POST("", ginrestaurant.CreateRestaurant(appContext))
 
 	// get by id
 	restaurants.GET("/:id", func(c *gin.Context) {
 		// get id use c.Params
-		id, err := strconv.Atoi(c.Param("id")) // Atoi: chuyển đổi một chuỗi số sang dạng số nguyên (int)
+		id, err := strconv.Atoi(c.Param("id")) // Atoi: string -> (int)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{
 				"error": err.Error(),
@@ -74,45 +78,12 @@ func main() {
 	})
 
 	// get all
-	restaurants.GET("", func(c *gin.Context) {
-		var data []Restaurant
-
-		// pagging data
-		type Paging struct {
-			Page  int `json:"page" form:"page"`
-			Limit int `json:"limit" form:"limit"`
-		}
-
-		var pagingData Paging
-
-		if err := c.ShouldBind(&pagingData); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{
-				"error": err.Error(),
-			})
-			return
-		}
-
-		if pagingData.Page <= 0 {
-			pagingData.Page = 1
-		}
-		if pagingData.Limit <= 0 {
-			pagingData.Limit = 5
-		}
-
-		db.Offset((pagingData.Page - 1) * pagingData.Limit).
-			Order("id desc").
-			Limit(pagingData.Limit).
-			Find(&data)
-
-		c.JSON(http.StatusOK, gin.H{
-			"data": data,
-		})
-	})
+	restaurants.GET("", ginrestaurant.ListRestaurant(appContext))
 
 	// update by id
-	restaurants.PUT("/:id", func(c *gin.Context) { // use postman nhớ chuyển sang kiểu json
+	restaurants.PUT("/:id", func(c *gin.Context) {
 		// get id use c.Params
-		id, err := strconv.Atoi(c.Param("id")) // Atoi: chuyển đổi một chuỗi số sang dạng số nguyên (int)
+		id, err := strconv.Atoi(c.Param("id")) // Atoi: string -> (int)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{
 				"error": err.Error(),
@@ -137,7 +108,7 @@ func main() {
 	})
 
 	// delete by id
-	restaurants.DELETE("/:id", ginrestaurant.DeleteRestaurant(db))
+	restaurants.DELETE("/:id", ginrestaurant.DeleteRestaurant(appContext))
 
 	r.Run() // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
 
