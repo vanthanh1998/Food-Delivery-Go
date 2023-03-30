@@ -1,16 +1,18 @@
 package ginrestaurant
 
 import (
+	"Food-Delivery/common"
+	"Food-Delivery/component/appctx"
 	restaurantbiz "Food-Delivery/module/restaurant/biz"
 	restaurantstorage "Food-Delivery/module/restaurant/storage"
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 	"net/http"
 	"strconv"
 )
 
-func DeleteRestaurant(db *gorm.DB) gin.HandlerFunc { // gin.HandlerFunc ~~ c *gin.Contex
+func DeleteRestaurant(appCtx appctx.AppContext) gin.HandlerFunc { // gin.HandlerFunc ~~ c *gin.Contex
 	return func(c *gin.Context) {
+		db := appCtx.GetMailDBConnection() // database
 		// get id use c.Params
 		id, err := strconv.Atoi(c.Param("id")) // Atoi: chuyển đổi một chuỗi số sang dạng số nguyên (int)
 		if err != nil {
@@ -30,8 +32,6 @@ func DeleteRestaurant(db *gorm.DB) gin.HandlerFunc { // gin.HandlerFunc ~~ c *gi
 			return
 		}
 
-		c.JSON(http.StatusOK, gin.H{
-			"data": 1,
-		})
+		c.JSON(http.StatusOK, common.SimpleSuccessResponse(true))
 	}
 }
