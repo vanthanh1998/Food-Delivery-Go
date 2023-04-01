@@ -10,6 +10,7 @@ type RestaurantType string
 
 const TypeNormal RestaurantType = "normal"
 const TypePremium RestaurantType = "premium"
+const EntityName = "Restaurant"
 
 type Restaurant struct {
 	common.SqlModel

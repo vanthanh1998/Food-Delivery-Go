@@ -16,20 +16,14 @@ func DeleteRestaurant(appCtx appctx.AppContext) gin.HandlerFunc { // gin.Handler
 		// get id use c.Params
 		id, err := strconv.Atoi(c.Param("id")) // Atoi: chuyển đổi một chuỗi số sang dạng số nguyên (int)
 		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{
-				"error": err.Error(),
-			})
-			return
+			panic(common.ErrInvalidRequest(err)) // not panic(err)  bởi vì strconv.Atoi(c.Param("id")) là lỗi golang trả về
 		}
 
 		store := restaurantstorage.NewSQLStore(db) // get db
 		biz := restaurantbiz.NewDeleteRestaurantBiz(store)
 
 		if err := biz.DeleteRestaurant(c.Request.Context(), id); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{
-				"error": err.Error(),
-			})
-			return
+			panic(err)
 		}
 
 		c.JSON(http.StatusOK, common.SimpleSuccessResponse(true))
