@@ -1,9 +1,9 @@
 package restaurantbiz
 
 import (
+	"Food-Delivery/common"
 	restaurantmodel "Food-Delivery/module/restaurant/model"
 	"context"
-	"errors"
 )
 
 // interface của golang thông thường khai báo ở nơi mà chúng ta dùng nó
@@ -28,16 +28,17 @@ func (biz *deleteRestaurantBiz) DeleteRestaurant(context context.Context, id int
 	// get old data
 	oldData, err := biz.store.FindDataWithCondition(context, map[string]interface{}{"id": id})
 
-	if err != nil {
-		return err
+	if err != nil { // TH1
+		return common.ErrEntityNotFound(restaurantmodel.EntityName, err)
 	}
 
-	if oldData.Status == 0 {
-		return errors.New("data has been deleted")
+	if oldData.Status == 0 { // TH2
+		// because TH1 return err => return new
+		return common.ErrEntityDeleted(restaurantmodel.EntityName, nil)
 	}
 
 	if err := biz.store.Delete(context, id); err != nil {
-		return err
+		return common.ErrCannotDeleteEntity(restaurantmodel.EntityName, nil)
 	}
 
 	return nil
