@@ -6,6 +6,10 @@ import (
 	"context"
 )
 
+// step 1: Fetch 1000 ids => caching
+// step 2: fetch 50 first ids => data (page 1)
+// step 3: Page 2, omit 50 ids and fetch the next 50 ids
+
 func (s *sqlStore) ListDataWithCondition(
 	context context.Context,
 	filter *restaurantmodel.Filter,
@@ -28,14 +32,30 @@ func (s *sqlStore) ListDataWithCondition(
 		return nil, common.ErrDB(err)
 	}
 
-	offset := (paging.Page - 1) * paging.Limit
+	if v := paging.FaceCursor; v != "" {
+		uid, err := common.FromBase58(v)
+
+		if err != nil {
+			return nil, common.ErrDB(err)
+		}
+
+		db = db.Where("id < ?", uid.GetLocalID())
+	} else {
+		offset := (paging.Page - 1) * paging.Limit
+		db = db.Offset(offset)
+	}
 
 	if err := db.
-		Offset(offset).
 		Limit(paging.Limit).
 		Order("id desc").
 		Find(&result).Error; err != nil {
 		return nil, common.ErrDB(err)
+	}
+
+	if len(result) > 0 {
+		last := result[len(result)-1]
+		last.Mask(false)
+		paging.NextCursor = last.FakeId.String()
 	}
 
 	return result, nil
