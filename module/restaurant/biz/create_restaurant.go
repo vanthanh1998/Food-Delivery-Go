@@ -6,7 +6,7 @@ import (
 	"context"
 )
 
-// tầng business thì gọi validate => k đc gọi ở storage hoặc transport
+// tầng business thì gọi validate => k đc gọi ở storage hoặc uploadtransport
 // interface của golang thông thường khai báo ở nơi mà chúng ta dùng nó
 type CreateRestaurantStore interface { // có thể dùng N interface này
 	Create(context context.Context, data *restaurantmodel.RestaurantCreate) error // storage/create.go

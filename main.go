@@ -4,6 +4,7 @@ import (
 	"Food-Delivery/component/appctx"
 	"Food-Delivery/middleware"
 	"Food-Delivery/module/restaurant/transport/ginrestaurant"
+	"Food-Delivery/module/upload/uploadtransport/ginupload"
 	"github.com/gin-gonic/gin"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -48,6 +49,7 @@ func main() {
 	//log.Println(test)
 
 	dsn := os.Getenv("MYSQL_CONN_STRING") // database connection string
+	// MYSQL_CONN_STRING=>food_delivery:19e5a718a54a9fe0559dfbce6908@tcp(127.0.0.1:3307)/food_delivery?charset=utf8mb4&parseTime=True&loc=Local
 
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{}) // database connection
 
@@ -68,8 +70,12 @@ func main() {
 		})
 	})
 
+	r.Static("/static", "./static")
+
 	// POST restaurant
 	v1 := r.Group("/v1")
+
+	v1.POST("/upload", ginupload.Upload(appContext))
 
 	restaurants := v1.Group("/restaurants")
 
