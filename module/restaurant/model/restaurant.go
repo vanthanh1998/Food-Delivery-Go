@@ -13,10 +13,12 @@ const TypePremium RestaurantType = "premium"
 const EntityName = "Restaurant"
 
 type Restaurant struct {
-	common.SqlModel        // common.SqlModel `json:",inline"`=> use verison old
-	Name            string `json:"name" gorm:"column:name;"`
-	Addr            string `json:"addr" gorm:"column:addr;"`
-	Type            string `json:"type" gorm:"column:type;"`
+	common.SqlModel                // common.SqlModel `json:",inline"`=> use verison old
+	Name            string         `json:"name" gorm:"column:name;"`
+	Addr            string         `json:"addr" gorm:"column:addr;"`
+	Type            RestaurantType `json:"type" gorm:"column:type;"`
+	Logo            *common.Image  `json:"logo" gorm:"column:logo;"`
+	Cover           *common.Images `json:"cover" gorm:"column:cover;"`
 }
 
 func (Restaurant) TableName() string { return "restaurants" }
@@ -27,8 +29,10 @@ func (r *Restaurant) Mask(isAdminOrOwner bool) {
 
 type RestaurantCreate struct {
 	common.SqlModel
-	Name string `json:"name" gorm:"column:name;"` // TODO
-	Addr string `json:"addr" gorm:"column:addr;"` // address
+	Name  string         `json:"name" gorm:"column:name;"` // TODO
+	Addr  string         `json:"addr" gorm:"column:addr;"` // address
+	Logo  *common.Image  `json:"logo" gorm:"column:logo;"`
+	Cover *common.Images `json:"cover" gorm:"column:cover;"`
 }
 
 func (data *RestaurantCreate) Mask(isAdminOrOwner bool) {
@@ -49,8 +53,10 @@ func (data *RestaurantCreate) Validate() error {
 
 // Trường hợp muốn update 1 filed nào đó về nil ~~ "" thì bắt buộc phải dùng con trỏ *,&
 type RestaurantUpdate struct {
-	Name *string `json:"name" gorm:"column:name"`
-	Addr *string `json:"addr" gorm:"column:addr"`
+	Name  *string        `json:"name" gorm:"column:name"`
+	Addr  *string        `json:"addr" gorm:"column:addr"`
+	Logo  *common.Image  `json:"logo" gorm:"column:logo;"`
+	Cover *common.Images `json:"cover" gorm:"column:cover;"`
 }
 
 func (RestaurantUpdate) TableName() string {

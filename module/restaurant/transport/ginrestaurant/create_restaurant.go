@@ -25,7 +25,7 @@ func CreateRestaurant(appCtx appctx.AppContext) gin.HandlerFunc { // gin.Handler
 
 		if err := c.ShouldBind(&data); err != nil {
 			// ShouldBind: dùng để đọc và gán giá trị từ các request parameter vào các struct
-			panic(err) // Lưu ý: hàm này chỉ dùng ở tầng ngoài cùng (transport)
+			panic(err) // Lưu ý: hàm này chỉ dùng ở tầng ngoài cùng (uploadtransport)
 		}
 
 		// db.Create(&data) ---- start ----

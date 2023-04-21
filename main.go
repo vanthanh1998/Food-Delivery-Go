@@ -2,8 +2,10 @@ package main
 
 import (
 	"Food-Delivery/component/appctx"
+	"Food-Delivery/component/uploadprovider"
 	"Food-Delivery/middleware"
 	"Food-Delivery/module/restaurant/transport/ginrestaurant"
+	"Food-Delivery/module/upload/uploadtransport/ginupload"
 	"github.com/gin-gonic/gin"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -34,7 +36,27 @@ func (RestaurantUpdate) TableName() string {
 }
 
 func main() {
+	//test := Restaurant{
+	//	Id:   1,
+	//	Name: "200lab",
+	//	Addr: "what the hell",
+	//}
+	//
+	//jsByte, err := json.Marshal(test)
+	//log.Println(string(jsByte), err) // {"id":1,"name":"200lab","addr":"what the hell"}
+	//
+	//json.Unmarshal([]byte("{\"id\":2,\"name\":\"200lab1998\",\"addr\":\"what the hell do you want naruto?\"}"), &test)
+	//
+	//log.Println(test)
+
 	dsn := os.Getenv("MYSQL_CONN_STRING") // database connection string
+	// MYSQL_CONN_STRING=>food_delivery:19e5a718a54a9fe0559dfbce6908@tcp(127.0.0.1:3307)/food_delivery?charset=utf8mb4&parseTime=True&loc=Local
+
+	s3BucketName := os.Getenv("S3BucketName")
+	s3Region := os.Getenv("S3Region")
+	s3APIKey := os.Getenv("S3APIKey")
+	s3SecretKey := os.Getenv("S3SecretKey")
+	s3Domain := os.Getenv("S3Domain")
 
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{}) // database connection
 
@@ -44,7 +66,9 @@ func main() {
 
 	db = db.Debug()
 
-	appContext := appctx.NewAppContext(db)
+	s3Provider := uploadprovider.NewS3Provider(s3BucketName, s3Region, s3APIKey, s3SecretKey, s3Domain)
+
+	appContext := appctx.NewAppContext(db, s3Provider)
 
 	r := gin.Default() // server connection
 	r.Use(middleware.Recover(appContext))
@@ -55,8 +79,12 @@ func main() {
 		})
 	})
 
+	r.Static("/static", "./static")
+
 	// POST restaurant
 	v1 := r.Group("/v1")
+
+	v1.POST("/upload", ginupload.Upload(appContext))
 
 	restaurants := v1.Group("/restaurants")
 
