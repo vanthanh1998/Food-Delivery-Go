@@ -5,9 +5,11 @@ import (
 	"Food-Delivery/component/appctx"
 	"Food-Delivery/module/upload/uploadbusiness"
 	"github.com/gin-gonic/gin"
+	_ "image/jpeg"
+	_ "image/png"
 )
 
-func Upload(appCtx appctx.AppContext) gin.HandlerFunc { // gin.HandlerFunc ~~ c *gin.Contex
+func Upload(appCtx appctx.AppContext) func(*gin.Context) { // gin.HandlerFunc ~~ c *gin.Contex
 	return func(c *gin.Context) {
 		fileHeader, err := c.FormFile("file")
 

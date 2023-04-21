@@ -3,6 +3,7 @@ package uploadbusiness
 import (
 	"Food-Delivery/common"
 	"Food-Delivery/component/uploadprovider"
+	"Food-Delivery/module/upload/uploadmodel"
 	"bytes"
 	"context"
 	"fmt"
@@ -14,9 +15,13 @@ import (
 	"time"
 )
 
+type CreateImageStorage interface {
+	CreateImage(context context.Context, data *common.Image) error
+}
+
 type uploadBiz struct {
-	provider uploadprovider.UploadProvider
-	imgStore CreateImageStorage // nó là imterface để call vào hàm CreateImageStorage
+	provider uploadprovider.UploadProvider // nó là interface để call vào hàm SaveFileUploaded
+	imgStore CreateImageStorage
 }
 
 func NewUploadBiz(provider uploadprovider.UploadProvider, imgStore CreateImageStorage) *uploadBiz {
@@ -29,7 +34,7 @@ func (biz *uploadBiz) Upload(ctx context.Context, data []byte, folder, fileName 
 	w, h, err := getImageDimension(fileBytes) // return width, height
 
 	if err != nil {
-		return nil, uploadModel.ErrFileIsNotImage(err)
+		return nil, uploadmodel.ErrFileIsNotImage(err)
 	}
 
 	if strings.TrimSpace(folder) == "" {
