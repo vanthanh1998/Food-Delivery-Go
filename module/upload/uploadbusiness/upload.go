@@ -15,8 +15,10 @@ import (
 	"time"
 )
 
+// interface
+// store
 type CreateImageStorage interface {
-	CreateImage(context context.Context, data *common.Image) error
+	CreateImage(context context.Context, data *common.Image) error // hàm này không sử dụng thêm vào cho zui :v
 }
 
 type uploadBiz struct {
@@ -44,7 +46,7 @@ func (biz *uploadBiz) Upload(ctx context.Context, data []byte, folder, fileName 
 	fileExt := filepath.Ext(fileName)                                // "img.jpg" => ".jpg"
 	fileName = fmt.Sprintf("%d%s", time.Now().Nanosecond(), fileExt) // 9129324893248.jpg
 
-	img, err := biz.provider.SaveFileUploaded(ctx, data, fmt.Sprintf("%s/%s", folder, fileName))
+	img, err := biz.provider.SaveFileUploaded(ctx, data, fmt.Sprintf("%s/%s", folder, fileName)) // s3
 
 	if err != nil {
 		return nil, uploadmodel.ErrCannotSaveFile(err)
