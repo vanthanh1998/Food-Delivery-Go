@@ -7,5 +7,5 @@ type sqlStore struct { // k viết hoa chữ cái đầu để k public ra ngoà
 }
 
 func NewSQLStore(db *gorm.DB) *sqlStore { // public ra ngoài
-	return &sqlStore{db: db}
+	return &sqlStore{db: db} // get db
 }

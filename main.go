@@ -12,36 +12,10 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"strconv"
 )
 
-type Restaurant struct {
-	Id   int    `json:"id" gorm:"column:id"`     // id of the restaurant
-	Name string `json:"name" gorm:"column:name"` // TODO
-	Addr string `json:"addr" gorm:"column:addr"` // address
-}
-
-func (Restaurant) TableName() string {
-	return "restaurants" // table name
-}
-
-// Trường hợp muốn update 1 filed nào đó về nil ~~ "" thì bắt buộc phải dùng con trỏ *,&
-type RestaurantUpdate struct {
-	Name *string `json:"name" gorm:"column:name"`
-	Addr *string `json:"addr" gorm:"column:addr"`
-}
-
-func (RestaurantUpdate) TableName() string {
-	return Restaurant{}.TableName() // table name
-}
-
 func main() {
-	//test := Restaurant{
-	//	Id:   1,
-	//	Name: "200lab",
-	//	Addr: "what the hell",
-	//}
-	//
+
 	//jsByte, err := json.Marshal(test)
 	//log.Println(string(jsByte), err) // {"id":1,"name":"200lab","addr":"what the hell"}
 	//
@@ -79,7 +53,7 @@ func main() {
 		})
 	})
 
-	r.Static("/static", "./static")
+	//r.Static("/static", "./static")
 
 	// POST restaurant
 	v1 := r.Group("/v1")
@@ -88,57 +62,10 @@ func main() {
 
 	restaurants := v1.Group("/restaurants")
 
-	restaurants.POST("", ginrestaurant.CreateRestaurant(appContext))
-
-	// get by id
-	restaurants.GET("/:id", func(c *gin.Context) {
-		// get id use c.Params
-		id, err := strconv.Atoi(c.Param("id")) // Atoi: string -> (int)
-		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{
-				"error": err.Error(),
-			})
-			return
-		}
-		var data Restaurant
-
-		db.Where("id = ?", id).First(&data)
-		c.JSON(http.StatusOK, gin.H{
-			"data": data,
-		})
-	})
-
-	// get all
 	restaurants.GET("", ginrestaurant.ListRestaurant(appContext))
-
-	// update by id
-	restaurants.PUT("/:id", func(c *gin.Context) {
-		// get id use c.Params
-		id, err := strconv.Atoi(c.Param("id")) // Atoi: string -> (int)
-		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{
-				"error": err.Error(),
-			})
-			return
-		}
-		var data RestaurantUpdate
-
-		if err := c.ShouldBind(&data); err != nil {
-			// ShouldBind: dùng để đọc và gán giá trị từ các request parameter vào các struct
-			c.JSON(http.StatusBadRequest, gin.H{
-				"error": err.Error(),
-			})
-			return
-		}
-
-		db.Where("id = ?", id).Updates(&data)
-		c.JSON(http.StatusOK, gin.H{
-			"status": 1,
-			"data":   data,
-		})
-	})
-
-	// delete by id
+	restaurants.GET("/:id", ginrestaurant.GetIdRestaurant(appContext))
+	restaurants.POST("", ginrestaurant.CreateRestaurant(appContext))
+	restaurants.PUT("/:id", ginrestaurant.UpdateRestaurant(appContext))
 	restaurants.DELETE("/:id", ginrestaurant.DeleteRestaurant(appContext))
 
 	r.Run() // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
