@@ -31,6 +31,7 @@ func CreateRestaurant(appCtx appctx.AppContext) gin.HandlerFunc { // gin.Handler
 		// db.Create(&data) ---- start ----
 		store := restaurantstorage.NewSQLStore(db) // store: call db
 		biz := restaurantbiz.NewCreateRestaurantBiz(store)
+
 		if err := biz.CreateRestaurant(c.Request.Context(), &data); err != nil {
 			panic(err)
 		}

@@ -9,7 +9,7 @@ import (
 	_ "image/png"
 )
 
-func Upload(appCtx appctx.AppContext) func(*gin.Context) { // gin.HandlerFunc ~~ c *gin.Contex
+func Upload(appCtx appctx.AppContext) gin.HandlerFunc { // gin.HandlerFunc ~~ c *gin.Contex
 	return func(c *gin.Context) {
 		fileHeader, err := c.FormFile("file")
 
