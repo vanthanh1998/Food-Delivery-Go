@@ -9,7 +9,7 @@ import (
 
 type AppError struct {
 	StatusCode int    `json:"status_code"`
-	RootErr    error  `json:"_"`
+	RootErr    error  `json:"-"`
 	Message    string `json:"message"`
 	Log        string `json:"log"`
 	Key        string `json:"error_key"`
@@ -142,7 +142,7 @@ func ErrCannotCreateEntity(entity string, err error) *AppError {
 	)
 }
 
-func ErrNoPermission(entity string, err error) *AppError {
+func ErrNoPermission(err error) *AppError {
 	return NewCustomError(
 		err,
 		fmt.Sprintf("You have no permission"),
