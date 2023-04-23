@@ -17,7 +17,7 @@ type Hasher interface {
 	Hash(data string) string
 }
 
-// store struct => thường dùng để gọi các interface đc khai báo trong file của nó thui => private
+// biz struct => thường dùng để gọi các interface đc khai báo trong file của nó thui => private
 type registerBusiness struct {
 	registerStore RegisterStore
 	hasher        Hasher
@@ -26,9 +26,9 @@ type registerBusiness struct {
 // new function:
 // 1. Biến bên trong hàm là những store struct đc khai báo bên trong {}
 // 2. Luôn return ha store struct
-func NewRegisterStore(registerStore RegisterStore, hasher Hasher) *registerBusiness {
+func NewRegisterBusiness(registerStore RegisterStore, hasher Hasher) *registerBusiness {
 	return &registerBusiness{
-		registerStore: registerStore,
+		registerStore: registerStore, // dùng để call func trong folder store
 		hasher:        hasher,
 	}
 }

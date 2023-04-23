@@ -25,7 +25,7 @@ func Register(appCtx appctx.AppContext) gin.HandlerFunc {
 		// md5: hash pw => call từ folder component/hasher
 		md5 := hasher.NewMd5Hash()
 		// biz new func
-		biz := userbiz.NewRegisterStore(store, md5) // registerStore RegisterStore, hasher Hasher
+		biz := userbiz.NewRegisterBusiness(store, md5) // registerStore RegisterStore, hasher Hasher
 
 		if err := biz.Register(c.Request.Context(), &data); err != nil {
 			panic(err)
