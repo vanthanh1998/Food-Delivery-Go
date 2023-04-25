@@ -17,11 +17,12 @@ type DeleteRestaurantStore interface { // có thể dùng N interface này
 }
 
 type deleteRestaurantBiz struct {
-	store DeleteRestaurantStore // khai báo store interface viết ở trên
+	store     DeleteRestaurantStore // khai báo store interface viết ở trên
+	requester common.Requester
 }
 
-func NewDeleteRestaurantBiz(store DeleteRestaurantStore) *deleteRestaurantBiz { // *deleteRestaurantBiz: return con trỏ *deleteRestaurantBiz
-	return &deleteRestaurantBiz{store: store} // bắt buộc phải có &
+func NewDeleteRestaurantBiz(store DeleteRestaurantStore, requester common.Requester) *deleteRestaurantBiz { // *deleteRestaurantBiz: return con trỏ *deleteRestaurantBiz
+	return &deleteRestaurantBiz{store: store, requester: requester} // bắt buộc phải có &
 }
 
 func (biz *deleteRestaurantBiz) DeleteRestaurant(context context.Context, id int) error {
@@ -35,6 +36,10 @@ func (biz *deleteRestaurantBiz) DeleteRestaurant(context context.Context, id int
 	if oldData.Status == 0 { // TH2
 		// because TH1 return err => return new
 		return common.ErrEntityDeleted(restaurantmodel.EntityName, nil)
+	}
+
+	if oldData.UserId != biz.requester.GetUserId() {
+		return common.ErrNoPermission(nil)
 	}
 
 	if err := biz.store.Delete(context, id); err != nil {

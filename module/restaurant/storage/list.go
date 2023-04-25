@@ -23,13 +23,17 @@ func (s *sqlStore) ListDataWithCondition(
 	// check conditions
 	if f := filter; f != nil {
 		if f.OwnerId > 0 {
-			db = db.Where("owner_id = ?", f.OwnerId)
+			db = db.Where("user_id = ?", f.OwnerId)
 		}
 	}
 
 	// count trước rồi mới paging
 	if err := db.Count(&paging.Total).Error; err != nil { // truyền con trỏ vào để nó có thể update đc total
 		return nil, common.ErrDB(err)
+	}
+
+	for i := range moreKeys {
+		db = db.Preload(moreKeys[i])
 	}
 
 	if v := paging.FaceCursor; v != "" {

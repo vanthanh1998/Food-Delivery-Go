@@ -12,6 +12,7 @@ import (
 func DeleteRestaurant(appCtx appctx.AppContext) gin.HandlerFunc { // gin.HandlerFunc ~~ c *gin.Contex
 	return func(c *gin.Context) {
 		db := appCtx.GetMailDBConnection() // database
+		requester := c.MustGet(common.CurrentUser).(common.Requester)
 		// get id use c.Params
 		//id, err := strconv.Atoi(c.Param("id")) // Atoi: chuyển đổi một chuỗi số sang dạng số nguyên (int)
 		uid, err := common.FromBase58(c.Param("id"))
@@ -21,7 +22,7 @@ func DeleteRestaurant(appCtx appctx.AppContext) gin.HandlerFunc { // gin.Handler
 		}
 
 		store := restaurantstorage.NewSQLStore(db) // get db
-		biz := restaurantbiz.NewDeleteRestaurantBiz(store)
+		biz := restaurantbiz.NewDeleteRestaurantBiz(store, requester)
 
 		if err := biz.DeleteRestaurant(c.Request.Context(), int(uid.GetLocalID())); err != nil {
 			panic(err)

@@ -60,7 +60,7 @@ func RequiredAuth(appCtx appctx.AppContext) gin.HandlerFunc {
 
 		user.Mask(false)
 
-		c.Set(common.CurrentUser, user)
+		c.Set(common.CurrentUser, user) // c.Set("user", "value") để lấy ra dùng c.MustGet("user")
 		c.Next()
 	}
 

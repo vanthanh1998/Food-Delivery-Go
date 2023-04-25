@@ -6,22 +6,20 @@ import (
 	"context"
 )
 
-// interface của golang thông thường khai báo ở nơi mà chúng ta dùng nó
-type ListRestaurantStore interface { // có thể dùng N interface này
-	ListDataWithCondition(
+type ListRestaurantRepo interface { // có thể dùng N interface này
+	ListRestaurant(
 		context context.Context,
 		filter *restaurantmodel.Filter,
 		paging *common.Paging,
-		moreKeys ...string,
-	) ([]restaurantmodel.Restaurant, error) // storage/list.go
+	) ([]restaurantmodel.Restaurant, error)
 }
 
 type listRestaurantBiz struct {
-	store ListRestaurantStore // khai báo store interface viết ở trên
+	repo ListRestaurantRepo // khai báo store interface viết ở trên
 }
 
-func NewListRestaurantBiz(store ListRestaurantStore) *listRestaurantBiz { // *deleteRestaurantBiz: return con trỏ *deleteRestaurantBiz
-	return &listRestaurantBiz{store: store} // bắt buộc phải có &
+func NewListRestaurantBiz(repo ListRestaurantRepo) *listRestaurantBiz {
+	return &listRestaurantBiz{repo: repo}
 }
 
 func (biz *listRestaurantBiz) ListRestaurant(
@@ -29,7 +27,7 @@ func (biz *listRestaurantBiz) ListRestaurant(
 	filter *restaurantmodel.Filter,
 	paging *common.Paging,
 ) ([]restaurantmodel.Restaurant, error) { // có 2 tham số []restaurantmodel.Restaurant, error) thì return về như phía dưới
-	result, err := biz.store.ListDataWithCondition(context, filter, paging)
+	result, err := biz.repo.ListRestaurant(context, filter, paging)
 
 	if err != nil {
 		return nil, err

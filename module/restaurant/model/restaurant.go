@@ -13,26 +13,34 @@ const TypePremium RestaurantType = "premium"
 const EntityName = "Restaurant"
 
 type Restaurant struct {
-	common.SqlModel                // common.SqlModel `json:",inline"`=> use verison old
-	Name            string         `json:"name" gorm:"column:name;"`
-	Addr            string         `json:"addr" gorm:"column:addr;"`
-	Type            RestaurantType `json:"type" gorm:"column:type;"`
-	Logo            *common.Image  `json:"logo" gorm:"column:logo;"`
-	Cover           *common.Images `json:"cover" gorm:"column:cover;"`
+	common.SqlModel                    // common.SqlModel `json:",inline"`=> use verison old
+	Name            string             `json:"name" gorm:"column:name;"`
+	Addr            string             `json:"addr" gorm:"column:addr;"`
+	Type            RestaurantType     `json:"type" gorm:"column:type;"`
+	Logo            *common.Image      `json:"logo" gorm:"column:logo;"`
+	Cover           *common.Images     `json:"cover" gorm:"column:cover;"`
+	UserId          int                `json:"-" gorm:"column:user_id;"`
+	User            *common.SimpleUser `json:"user" gorm:"preload:false;"` // *common.SimpleUser => dùng để bỏ qua những thông tin của user như email, phone
+	LikeCount       int                `json:"like_count" gorm:"-"`
 }
 
 func (Restaurant) TableName() string { return "restaurants" }
 
 func (r *Restaurant) Mask(isAdminOrOwner bool) {
 	r.GenUID(common.DbTypeRestaurant)
+
+	if u := r.User; u != nil {
+		u.Mask(isAdminOrOwner)
+	}
 }
 
 type RestaurantCreate struct {
 	common.SqlModel
-	Name  string         `json:"name" gorm:"column:name;"` // TODO
-	Addr  string         `json:"addr" gorm:"column:addr;"` // address
-	Logo  *common.Image  `json:"logo" gorm:"column:logo;"`
-	Cover *common.Images `json:"cover" gorm:"column:cover;"`
+	Name   string         `json:"name" gorm:"column:name;"` // TODO
+	Addr   string         `json:"addr" gorm:"column:addr;"` // address
+	UserId int            `json:"-" gorm:"column:user_id;"`
+	Logo   *common.Image  `json:"logo" gorm:"column:logo;"`
+	Cover  *common.Images `json:"cover" gorm:"column:cover;"`
 }
 
 func (data *RestaurantCreate) Mask(isAdminOrOwner bool) {

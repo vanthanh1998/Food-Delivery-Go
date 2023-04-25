@@ -14,6 +14,8 @@ func CreateRestaurant(appCtx appctx.AppContext) gin.HandlerFunc { // gin.Handler
 	return func(c *gin.Context) {
 		db := appCtx.GetMailDBConnection() // database
 
+		requester := c.MustGet(common.CurrentUser).(common.Requester)
+
 		//go func() {
 		//	defer common.AppRecover()
 		//
@@ -27,6 +29,8 @@ func CreateRestaurant(appCtx appctx.AppContext) gin.HandlerFunc { // gin.Handler
 			// ShouldBind: dùng để đọc và gán giá trị từ các request parameter vào các struct
 			panic(err) // Lưu ý: hàm này chỉ dùng ở tầng ngoài cùng (uploadtransport)
 		}
+
+		data.UserId = requester.GetUserId()
 
 		// db.Create(&data) ---- start ----
 		store := restaurantstorage.NewSQLStore(db) // store: call db
