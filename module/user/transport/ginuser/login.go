@@ -22,7 +22,7 @@ func Login(appCtx appctx.AppContext) gin.HandlerFunc {
 		}
 
 		tokenProvider := jwt.NewTokenJWTProvider(appCtx.SecretKey())
-		// store
+		// storage
 		store := userstore.NewSQLStore(db)
 		// md5
 		md5 := hasher.NewMd5Hash()

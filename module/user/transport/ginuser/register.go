@@ -20,7 +20,7 @@ func Register(appCtx appctx.AppContext) gin.HandlerFunc {
 		if err := c.ShouldBind(&data); err != nil {
 			panic(err)
 		}
-		// store ~~ call db store.go trong folder storage
+		// storage ~~ call db storage.go trong folder storage
 		store := userstore.NewSQLStore(db)
 		// md5: hash pw => call từ folder component/hasher
 		md5 := hasher.NewMd5Hash()

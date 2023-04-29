@@ -7,7 +7,7 @@ import (
 	restaurantmodel "Food-Delivery/module/restaurant/model"
 	restaurantrepo "Food-Delivery/module/restaurant/repository"
 	restaurantstorage "Food-Delivery/module/restaurant/storage"
-	restaurantlikestore "Food-Delivery/module/restaurantlike/store"
+	restaurantlikestore "Food-Delivery/module/restaurantlike/storage"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -40,7 +40,7 @@ func ListRestaurant(appCtx appctx.AppContext) gin.HandlerFunc { // gin.HandlerFu
 		}
 
 		// db.Create(&data) ---- start ----
-		store := restaurantstorage.NewSQLStore(db) // store: call db
+		store := restaurantstorage.NewSQLStore(db) // storage: call db
 		likeStore := restaurantlikestore.NewSQLStore(db)
 		repo := restaurantrepo.NewListRestaurantRepo(store, likeStore) // tầng repository => gánh phần liên kết dữ liệu
 		biz := restaurantbiz.NewListRestaurantBiz(repo)

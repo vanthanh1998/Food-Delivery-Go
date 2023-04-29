@@ -33,7 +33,7 @@ func CreateRestaurant(appCtx appctx.AppContext) gin.HandlerFunc { // gin.Handler
 		data.UserId = requester.GetUserId()
 
 		// db.Create(&data) ---- start ----
-		store := restaurantstorage.NewSQLStore(db) // store: call db
+		store := restaurantstorage.NewSQLStore(db) // storage: call db
 		biz := restaurantbiz.NewCreateRestaurantBiz(store)
 
 		if err := biz.CreateRestaurant(c.Request.Context(), &data); err != nil {

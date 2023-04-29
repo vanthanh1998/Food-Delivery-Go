@@ -24,11 +24,11 @@ type registerBusiness struct {
 }
 
 // new function:
-// 1. Biến bên trong hàm là những store struct đc khai báo bên trong {}
-// 2. Luôn return ha store struct
+// 1. Biến bên trong hàm là những storage struct đc khai báo bên trong {}
+// 2. Luôn return ha storage struct
 func NewRegisterBusiness(registerStore RegisterStore, hasher Hasher) *registerBusiness {
 	return &registerBusiness{
-		registerStore: registerStore, // dùng để call func trong folder store
+		registerStore: registerStore, // dùng để call func trong folder storage
 		hasher:        hasher,
 	}
 }

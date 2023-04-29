@@ -42,7 +42,7 @@ func (biz *listRestaurantRepo) ListRestaurant(
 		return nil, err
 	}
 
-	// xử lý hàm GetRestaurantLikes => mai xem :))
+	// xử lý hàm GetRestaurantLikes => start
 	ids := make([]int, len(result))
 
 	for i := range ids {
@@ -60,6 +60,7 @@ func (biz *listRestaurantRepo) ListRestaurant(
 	for i, item := range result {
 		result[i].LikeCount = likeMap[item.Id]
 	}
+	// => end
 
 	return result, nil
 }

@@ -1,4 +1,4 @@
-package restaurantlikestore
+package restaurantlikestorage
 
 import (
 	"Food-Delivery/common"
@@ -6,7 +6,7 @@ import (
 	"context"
 )
 
-func (s *sqlStore) Create(ctx context.Context, data restaurantlikemodel.Like) error {
+func (s *sqlStore) Create(ctx context.Context, data *restaurantlikemodel.Like) error {
 	if err := s.db.Create(&data).Error; err != nil {
 		return common.ErrDB(err)
 	}

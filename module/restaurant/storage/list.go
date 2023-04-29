@@ -22,8 +22,8 @@ func (s *sqlStore) ListDataWithCondition(
 
 	// check conditions
 	if f := filter; f != nil {
-		if f.OwnerId > 0 {
-			db = db.Where("user_id = ?", f.OwnerId)
+		if f.UserId > 0 {
+			db = db.Where("user_id = ?", f.UserId)
 		}
 	}
 

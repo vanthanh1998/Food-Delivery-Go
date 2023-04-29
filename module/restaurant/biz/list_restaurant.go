@@ -15,7 +15,7 @@ type ListRestaurantRepo interface { // có thể dùng N interface này
 }
 
 type listRestaurantBiz struct {
-	repo ListRestaurantRepo // khai báo store interface viết ở trên
+	repo ListRestaurantRepo // khai báo storage interface viết ở trên
 }
 
 func NewListRestaurantBiz(repo ListRestaurantRepo) *listRestaurantBiz {

@@ -29,7 +29,7 @@ func UpdateRestaurant(appCtx appctx.AppContext) gin.HandlerFunc {
 			return
 		}
 
-		// store
+		// storage
 		store := restaurantstorage.NewSQLStore(db)
 		// biz
 		biz := restaurantbiz.NewUpdateRestaurantBiz(store) // nếu k có hàm Updateở trong storeafe/update.go thì sẽ báo err

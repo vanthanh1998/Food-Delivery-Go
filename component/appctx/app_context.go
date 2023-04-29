@@ -11,7 +11,7 @@ type AppContext interface {
 	SecretKey() string
 }
 
-type appCtx struct { // ~~ sqlStore in store.go
+type appCtx struct { // ~~ sqlStore in storage.go
 	db             *gorm.DB
 	uploadProvider uploadprovider.UploadProvider
 	secretKey      string
