@@ -32,7 +32,9 @@ func UserLikeRestaurant(appCtx appctx.AppContext) gin.HandlerFunc {
 		biz := rstlikebiz.NewUserLikeRestaurantBiz(store)
 
 		if err := biz.UserLikeRestaurant(c.Request.Context(), &data); err != nil {
-			c.JSON(http.StatusOK, common.SimpleSuccessResponse("like ok"))
+			panic(err) // xuất ra lỗi trong tầng biz
 		}
+
+		c.JSON(http.StatusOK, common.SimpleSuccessResponse(true))
 	}
 }
