@@ -6,13 +6,13 @@ import (
 	restaurantstorage "Food-Delivery/module/restaurant/storage"
 	rstlikebiz "Food-Delivery/module/restaurantlike/biz"
 	restaurantlikemodel "Food-Delivery/module/restaurantlike/model"
-	restaurantlikestore "Food-Delivery/module/restaurantlike/storage"
+	restaurantlikestorage "Food-Delivery/module/restaurantlike/storage"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
 
-// POST /v1/restaurants/:id/like
-func UserLikeRestaurant(appCtx appctx.AppContext) gin.HandlerFunc {
+// POST /v1/restaurants/:id/dislike
+func UserDislikeRestaurant(appCtx appctx.AppContext) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		db := appCtx.GetMailDBConnection()
 
@@ -21,7 +21,6 @@ func UserLikeRestaurant(appCtx appctx.AppContext) gin.HandlerFunc {
 		if err != nil {
 			panic(common.ErrInvalidRequest(err))
 		}
-
 		requester := c.MustGet(common.CurrentUser).(common.Requester)
 
 		data := restaurantlikemodel.Like{
@@ -29,12 +28,12 @@ func UserLikeRestaurant(appCtx appctx.AppContext) gin.HandlerFunc {
 			UserId:       requester.GetUserId(),
 		}
 
-		store := restaurantlikestore.NewSQLStore(db)
-		incStore := restaurantstorage.NewSQLStore(db)
-		biz := rstlikebiz.NewUserLikeRestaurantBiz(store, incStore)
+		store := restaurantlikestorage.NewSQLStore(db)
+		decStore := restaurantstorage.NewSQLStore(db)
+		biz := rstlikebiz.NewUserDislikeRestaurantBiz(store, decStore)
 
-		if err := biz.UserLikeRestaurant(c.Request.Context(), &data); err != nil {
-			panic(err) // xuất ra lỗi trong tầng biz
+		if err := biz.DislikeRestaurant(c.Request.Context(), &data); err != nil {
+			panic(err)
 		}
 
 		c.JSON(http.StatusOK, common.SimpleSuccessResponse(true))
