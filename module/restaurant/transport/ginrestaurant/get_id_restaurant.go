@@ -8,21 +8,27 @@ import (
 	restaurantstorage "Food-Delivery/module/restaurant/storage"
 	"github.com/gin-gonic/gin"
 	"net/http"
-	"strconv"
 )
 
 func GetIdRestaurant(appCtx appctx.AppContext) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		id, err := strconv.Atoi(c.Param("id"))
+		//id, err := strconv.Atoi(c.Param("id"))
+		//if err != nil {
+		//	panic(common.ErrInvalidRequest(err))
+		//}
+
+		uid, err := common.FromBase58(c.Param("id"))
+
 		if err != nil {
 			panic(common.ErrInvalidRequest(err))
 		}
+		
 		var data restaurantmodel.Restaurant
 		db := appCtx.GetMailDBConnection()
 		store := restaurantstorage.NewSQLStore(db)
 		biz := restaurantbiz.NewGetIdRestaurantBiz(store)
 
-		if err := biz.GetIdRestaurant(c.Request.Context(), id, &data); err != nil {
+		if err := biz.GetIdRestaurant(c.Request.Context(), int(uid.GetLocalID()), &data); err != nil {
 			panic(err)
 		}
 		data.Mask(false)
