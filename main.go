@@ -4,9 +4,7 @@ import (
 	"Food-Delivery/component/appctx"
 	"Food-Delivery/component/uploadprovider"
 	"Food-Delivery/middleware"
-	"Food-Delivery/module/restaurant/transport/ginrestaurant"
-	"Food-Delivery/module/upload/uploadtransport/ginupload"
-	"Food-Delivery/module/user/transport/ginuser"
+	"Food-Delivery/routes"
 	"github.com/gin-gonic/gin"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -57,62 +55,9 @@ func main() {
 
 	//r.Static("/static", "./static")
 
-	// POST restaurant
 	v1 := r.Group("/v1")
-
-	v1.POST("/upload", ginupload.Upload(appContext))
-
-	// user
-	v1.POST("/register", ginuser.Register(appContext))
-	v1.POST("/authenticate/login", ginuser.Login(appContext))
-	v1.GET("/profile", middleware.RequiredAuth(appContext), ginuser.Profile(appContext))
-
-	restaurants := v1.Group("/restaurants")
-
-	restaurants.GET("", ginrestaurant.ListRestaurant(appContext))
-	restaurants.GET("/:id", ginrestaurant.GetIdRestaurant(appContext))
-	restaurants.POST("", ginrestaurant.CreateRestaurant(appContext))
-	restaurants.PUT("/:id", ginrestaurant.UpdateRestaurant(appContext))
-	restaurants.DELETE("/:id", ginrestaurant.DeleteRestaurant(appContext))
+	routes.SetupRoute(appContext, v1)
+	routes.SetupAdminRoute(appContext, v1)
 
 	r.Run() // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
-
-	//newRestaurant := Restaurant{
-	//	Name: "megumi fushigoro",
-	//	Addr: "Shukuna",
-	//}
-	////----------------------------create--------------------------------
-	//if err := db.Create(&newRestaurant).Error; err != nil {
-	//	// truyền &(con trỏ): để thay đổi dữ liệu trong table Restaurant
-	//	log.Println(err)
-	//}
-	//log.Println("New success Id = ", newRestaurant.Id)
-
-	// ----------------------------Read--------------------------------
-	//var restaurants Restaurant
-	//if err := db.Where("id = ?", 6).Find(&restaurants).Error; err!= nil {
-	//    log.Println(err)
-	//}
-	//
-	//log.Println(restaurants)
-	//
-	//// ----------------------------Update--------------------------------
-	//restaurants.Name = "Megumi Fushigoro"
-	//if err := db.Where("id = ?", 6).Updates(&restaurants).Error; err!= nil {
-	//	log.Println(err)
-	//}
-	//log.Println(restaurants)
-	//
-	//// ----------------------------Update name = nil ~~ ""--------------------------------
-	//newName := "ThanhRain"
-	//updateData := RestaurantUpdate{Name: &newName}
-	//if err := db.Where("id = ?", 3).Updates(&updateData).Error; err!= nil {
-	//	log.Println(err)
-	//}
-	//log.Println(restaurants)
-	//// ----------------------------Delete--------------------------------
-	//if err := db.Table(Restaurant{}.TableName()).Where("id =?", 1).Delete(nil).Error; err!= nil {
-	//    log.Println(err)
-	//}
-	//log.Println(restaurants)
 }

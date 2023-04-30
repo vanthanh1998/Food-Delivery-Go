@@ -16,7 +16,7 @@ import (
 )
 
 // interface
-// store
+// storage
 type CreateImageStorage interface {
 	CreateImage(context context.Context, data *common.Image) error // hàm này không sử dụng thêm vào cho zui :v
 }

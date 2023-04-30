@@ -1,5 +1,5 @@
 package restaurantmodel
 
 type Filter struct {
-	OwnerId int `json:"owner_id,omitempty" form:"owner_id"` // form => use querystring trên đường dẫn
+	UserId int `json:"user_id,omitempty" form:"user_id"` // form => use querystring trên đường dẫn
 }

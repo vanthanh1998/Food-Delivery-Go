@@ -7,7 +7,7 @@ import (
 )
 
 // interface
-// struct store biz => private
+// struct storage biz => private
 // function new
 // hàm chính
 
@@ -27,7 +27,7 @@ func (biz *updateRestaurantBiz) UpdateRestaurant(ctx context.Context, id int, da
 	// biz *updateRestaurantBiz dùng để gọi hàm update ở interface
 
 	// validate
-	
+
 	/**/
 	if err := biz.store.Update(ctx, id, data); err != nil {
 		return common.ErrCannotUpdateEntity(restaurantmodel.EntityName, err)

@@ -14,6 +14,8 @@ func CreateRestaurant(appCtx appctx.AppContext) gin.HandlerFunc { // gin.Handler
 	return func(c *gin.Context) {
 		db := appCtx.GetMailDBConnection() // database
 
+		requester := c.MustGet(common.CurrentUser).(common.Requester)
+
 		//go func() {
 		//	defer common.AppRecover()
 		//
@@ -28,8 +30,10 @@ func CreateRestaurant(appCtx appctx.AppContext) gin.HandlerFunc { // gin.Handler
 			panic(err) // Lưu ý: hàm này chỉ dùng ở tầng ngoài cùng (uploadtransport)
 		}
 
+		data.UserId = requester.GetUserId()
+
 		// db.Create(&data) ---- start ----
-		store := restaurantstorage.NewSQLStore(db) // store: call db
+		store := restaurantstorage.NewSQLStore(db) // storage: call db
 		biz := restaurantbiz.NewCreateRestaurantBiz(store)
 
 		if err := biz.CreateRestaurant(c.Request.Context(), &data); err != nil {
