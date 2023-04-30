@@ -6,7 +6,7 @@ import (
 )
 
 type GetIdRestaurantStore interface {
-	GetId(ctx context.Context, id int, data *restaurantmodel.Restaurant) error // interface gọi thẳng hàm thực hiện chính của tầng biz
+	GetId(ctx context.Context, id int, data *restaurantmodel.Restaurant, moreKeys ...string) error // interface gọi thẳng hàm thực hiện chính của tầng biz
 }
 
 type getIdRestaurantBiz struct {
@@ -18,7 +18,7 @@ func NewGetIdRestaurantBiz(store GetIdRestaurantStore) *getIdRestaurantBiz {
 }
 
 func (biz *getIdRestaurantBiz) GetIdRestaurant(ctx context.Context, id int, data *restaurantmodel.Restaurant) error {
-	if err := biz.store.GetId(ctx, id, data); err != nil {
+	if err := biz.store.GetId(ctx, id, data, "User"); err != nil {
 		return err
 	}
 	return nil
