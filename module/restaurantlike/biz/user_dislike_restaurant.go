@@ -2,9 +2,9 @@ package rstlikebiz
 
 import (
 	"Food-Delivery/common"
-	"Food-Delivery/component/asyncjob"
 	restaurantmodel "Food-Delivery/module/restaurant/model"
 	restaurantlikemodel "Food-Delivery/module/restaurantlike/model"
+	"Food-Delivery/pubsub"
 	"context"
 	"log"
 )
@@ -19,24 +19,27 @@ type UserDislikeRestaurantStore interface {
 	) (*restaurantmodel.Restaurant, error)
 }
 
-type DecLikedCountRestaurantStore interface {
-	DecreaseLikeCount(ctx context.Context, id int) error
-}
+//type DecLikedCountRestaurantStore interface {
+//	DecreaseLikeCount(ctx context.Context, id int) error
+//}
 
 // store biz
 type userDislikeRestaurantBiz struct {
-	store    UserDislikeRestaurantStore
-	decStore DecLikedCountRestaurantStore
+	store UserDislikeRestaurantStore
+	//decStore DecLikedCountRestaurantStore
+	ps pubsub.Pubsub
 }
 
 // new func
 func NewUserDislikeRestaurantBiz(
 	store UserDislikeRestaurantStore,
-	decStore DecLikedCountRestaurantStore,
+	//decStore DecLikedCountRestaurantStore,
+	ps pubsub.Pubsub,
 ) *userDislikeRestaurantBiz {
 	return &userDislikeRestaurantBiz{
-		store:    store,
-		decStore: decStore,
+		store: store,
+		//decStore: decStore,
+		ps: ps,
 	}
 }
 
@@ -59,15 +62,19 @@ func (biz *userDislikeRestaurantBiz) DislikeRestaurant(
 		return restaurantlikemodel.ErrCannotDislikeRestaurant(err)
 	}
 
-	// slide effect
-	j := asyncjob.NewJob(func(ctx context.Context) error {
-		return biz.decStore.DecreaseLikeCount(ctx, data.RestaurantId)
-	})
-
-	// run concurrent
-	if err := asyncjob.NewGroup(true, j).Run(ctx); err != nil {
+	if err := biz.ps.Publish(ctx, common.TopicUserDislikeRestaurant, pubsub.NewMessage(data)); err != nil {
 		log.Println(err)
 	}
+
+	// slide effect
+	//j := asyncjob.NewJob(func(ctx context.Context) error {
+	//	return biz.decStore.DecreaseLikeCount(ctx, data.RestaurantId)
+	//})
+	//
+	//// run concurrent
+	//if err := asyncjob.NewGroup(true, j).Run(ctx); err != nil {
+	//	log.Println(err)
+	//}
 
 	// TH update bị nghẽn thì nó sẽ chặn API vì vậy phải open grountines
 	//go func() {
