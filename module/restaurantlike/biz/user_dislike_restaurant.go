@@ -2,6 +2,7 @@ package rstlikebiz
 
 import (
 	"Food-Delivery/common"
+	restaurantmodel "Food-Delivery/module/restaurant/model"
 	restaurantlikemodel "Food-Delivery/module/restaurantlike/model"
 	"context"
 	"log"
@@ -10,6 +11,11 @@ import (
 // store interface
 type UserDislikeRestaurantStore interface {
 	Delete(ctx context.Context, data *restaurantlikemodel.Like) error
+	FindDataWithCondition(
+		context context.Context,
+		condition map[string]interface{}, // map[key]value
+		moreKeys ...string,
+	) (*restaurantmodel.Restaurant, error)
 }
 
 type DecLikedCountRestaurantStore interface {
@@ -38,9 +44,17 @@ func (biz *userDislikeRestaurantBiz) DislikeRestaurant(
 	ctx context.Context,
 	data *restaurantlikemodel.Like,
 ) error {
-	err := biz.store.Delete(ctx, data)
+	dataRestaurant, err := biz.store.FindDataWithCondition(ctx, map[string]interface{}{"id": data.RestaurantId})
 
 	if err != nil {
+		return common.ErrEntityNotFound(restaurantmodel.EntityName, err)
+	}
+
+	if dataRestaurant.LikedCount == 0 {
+		return restaurantlikemodel.ErrCannotDislikeRestaurant(err)
+	}
+
+	if err := biz.store.Delete(ctx, data); err != nil {
 		return restaurantlikemodel.ErrCannotDislikeRestaurant(err)
 	}
 

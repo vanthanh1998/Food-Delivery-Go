@@ -40,7 +40,6 @@ func (biz *userLikeRestaurantBiz) UserLikeRestaurant(
 	ctx context.Context,
 	data *restaurantlikemodel.Like,
 ) error {
-
 	dataRestaurant, err := biz.store.FindDataWithCondition(ctx, map[string]interface{}{"id": data.RestaurantId})
 
 	if err != nil {
