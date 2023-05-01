@@ -2,6 +2,7 @@ package rstlikebiz
 
 import (
 	"Food-Delivery/common"
+	"Food-Delivery/component/asyncjob"
 	restaurantmodel "Food-Delivery/module/restaurant/model"
 	restaurantlikemodel "Food-Delivery/module/restaurantlike/model"
 	"context"
@@ -58,14 +59,24 @@ func (biz *userDislikeRestaurantBiz) DislikeRestaurant(
 		return restaurantlikemodel.ErrCannotDislikeRestaurant(err)
 	}
 
+	// slide effect
+	j := asyncjob.NewJob(func(ctx context.Context) error {
+		return biz.decStore.DecreaseLikeCount(ctx, data.RestaurantId)
+	})
+
+	// run concurrent
+	if err := asyncjob.NewGroup(true, j).Run(ctx); err != nil {
+		log.Println(err)
+	}
+
 	// TH update bị nghẽn thì nó sẽ chặn API vì vậy phải open grountines
-	go func() {
-		defer common.AppRecover()
-		if err := biz.decStore.DecreaseLikeCount(ctx, data.RestaurantId); err != nil {
-			// k chặn đếm like
-			log.Println(err)
-		}
-	}()
+	//go func() {
+	//	defer common.AppRecover()
+	//	if err := biz.decStore.DecreaseLikeCount(ctx, data.RestaurantId); err != nil {
+	//		// k chặn đếm like
+	//		log.Println(err)
+	//	}
+	//}()
 
 	return nil
 }
