@@ -11,6 +11,11 @@ const (
 	CurrentUser = "user"
 )
 
+const (
+	TopicUserLikeRestaurant    = "TopicUserLikeRestaurant"
+	TopicUserDislikeRestaurant = "TopicUserDislikeRestaurant"
+)
+
 type Requester interface {
 	GetUserId() int
 	GetEmail() string

@@ -2,9 +2,9 @@ package rstlikebiz
 
 import (
 	"Food-Delivery/common"
-	"Food-Delivery/component/asyncjob"
 	restaurantmodel "Food-Delivery/module/restaurant/model"
 	restaurantlikemodel "Food-Delivery/module/restaurantlike/model"
+	"Food-Delivery/pubsub"
 	"golang.org/x/net/context"
 	"log"
 )
@@ -18,22 +18,25 @@ type UserLikeRestaurantStore interface {
 	) (*restaurantmodel.Restaurant, error)
 }
 
-type IncLikedCountRestaurantStore interface {
-	IncreaseLikeCount(ctx context.Context, id int) error
-}
+//type IncLikedCountRestaurantStore interface {
+//	IncreaseLikeCount(ctx context.Context, id int) error
+//}
 
 type userLikeRestaurantBiz struct {
-	store    UserLikeRestaurantStore
-	incStore IncLikedCountRestaurantStore
+	store UserLikeRestaurantStore
+	//incStore IncLikedCountRestaurantStore
+	ps pubsub.Pubsub
 }
 
 func NewUserLikeRestaurantBiz(
 	store UserLikeRestaurantStore,
-	incStore IncLikedCountRestaurantStore,
+	//incStore IncLikedCountRestaurantStore,
+	ps pubsub.Pubsub,
 ) *userLikeRestaurantBiz {
 	return &userLikeRestaurantBiz{
-		store:    store,
-		incStore: incStore,
+		store: store,
+		//incStore: incStore,
+		ps: ps,
 	}
 }
 
@@ -55,15 +58,20 @@ func (biz *userLikeRestaurantBiz) UserLikeRestaurant(
 		return restaurantlikemodel.ErrCannotLikeRestaurant(err)
 	}
 
-	// slide effect
-	j := asyncjob.NewJob(func(ctx context.Context) error {
-		return biz.incStore.IncreaseLikeCount(ctx, data.RestaurantId)
-	})
-
-	// run concurrent
-	if err := asyncjob.NewGroup(true, j).Run(ctx); err != nil {
+	if err := biz.ps.Publish(ctx, common.TopicUserLikeRestaurant, pubsub.NewMessage(data)); err != nil {
 		log.Println(err)
 	}
+
+	// slide effect
+	//j := asyncjob.NewJob(func(ctx context.Context) error {
+	//	return biz.incStore.IncreaseLikeCount(ctx, data.RestaurantId)
+	//})
+	//
+	//// run concurrent
+	//if err := asyncjob.NewGroup(true, j).Run(ctx); err != nil {
+	//	log.Println(err)
+	//}
+
 	// TH update bị nghẽn thì nó sẽ chặn API vì vậy phải open grountines
 	//go func() {
 	//	defer common.AppRecover()
