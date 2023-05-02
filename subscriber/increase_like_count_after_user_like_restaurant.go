@@ -1,10 +1,11 @@
 package subscriber
 
 import (
-	"Food-Delivery/common"
 	"Food-Delivery/component/appctx"
 	restaurantstorage "Food-Delivery/module/restaurant/storage"
+	"Food-Delivery/pubsub"
 	"context"
+	"log"
 )
 
 type HasRestaurantId interface {
@@ -12,19 +13,27 @@ type HasRestaurantId interface {
 	//GetUserId() int
 }
 
-func IncreaseLikeCountAfterUserLikeRestaurant(appCtx appctx.AppContext, ctx context.Context) {
-	c, _ := appCtx.GetPubSub().Subscribe(ctx, common.TopicUserLikeRestaurant)
+func IncreaseLikeCountAfterUserLikeRestaurant(appCtx appctx.AppContext) consumerJob {
+	return consumerJob{
+		Title: "Increase like count after user like restaurant",
+		Hld: func(ctx context.Context, message *pubsub.Message) error {
+			db := appCtx.GetMailDBConnection()
+			store := restaurantstorage.NewSQLStore(db)
+			likeData := message.Data().(HasRestaurantId)
 
-	db := appCtx.GetMailDBConnection()
+			return store.IncreaseLikeCount(ctx, likeData.GetRestaurantId())
+		},
+	}
+}
 
-	store := restaurantstorage.NewSQLStore(db)
+func PushNotificationWhenUserLikeRestaurant(appCtx appctx.AppContext) consumerJob {
+	return consumerJob{
+		Title: "Push notification when user like restaurant",
+		Hld: func(ctx context.Context, message *pubsub.Message) error {
+			likeData := message.Data().(HasRestaurantId)
+			log.Println("Push notification when user like restaurant id: ", likeData.GetRestaurantId())
 
-	go func() {
-		defer common.AppRecover()
-		for {
-			msg := <-c // rút data vào msg
-			likeData := msg.Data().(HasRestaurantId)
-			_ = store.IncreaseLikeCount(ctx, likeData.GetRestaurantId())
-		}
-	}()
+			return nil
+		},
+	}
 }
