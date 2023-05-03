@@ -8,6 +8,7 @@ import (
 	userstore "Food-Delivery/module/user/store"
 	"Food-Delivery/pubsub/localpb"
 	"Food-Delivery/routes"
+	"Food-Delivery/skio"
 	"Food-Delivery/subscriber"
 	"context"
 	"errors"
@@ -79,8 +80,8 @@ func main() {
 	routes.SetupRoute(appContext, v1)
 	routes.SetupAdminRoute(appContext, v1)
 
-	startSocketIOServer(r, appContext)
-
+	//startSocketIOServer(r, appContext)
+	skio.NewEngine().Run(appContext, r)
 	r.Run() // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
 }
 
@@ -127,7 +128,7 @@ func startSocketIOServer(engine *gin.Engine, appCtx appctx.AppContext) {
 		// => UserID
 		// Fetch db find user by ID
 		// Here: s belongs to who? (user_id)
-		// We need a map[user_id][]socketio.Conn
+		// We need a map[user_id][]skio.Conn
 
 		db := appCtx.GetMailDBConnection()
 		store := userstore.NewSQLStore(db)

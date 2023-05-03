@@ -34,7 +34,7 @@
     socket.on("notice",(p) => console.log("notice: ", p));
 
     socket.on("authenticated", (msg) => {
-        console.lgog("authenticated", msg);
+        console.log("authenticated", msg);
     })
     socket.on("your_profile",(msg) => console.log("your profile", msg));
     socket.on("authentication_failed",(msg) => console.log("authentication_failed", msg));
