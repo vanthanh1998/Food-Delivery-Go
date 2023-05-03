@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Demo socket 200lab</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.4.8/socket.io.js"></script>
+</head>
+<body>
+    <div id="main">
+        <h1>Demo Socket IO</h1>
+    </div>
+<script>
+    const socket = io("", {transports : ['websocket']});
+    var locTimer = null;
+
+    socket.on("connect", () => {
+        console.log("Client connected")
+
+        // locTimer = setInterval(() => {
+        //     socket.emit("test", "10")
+        // },1000)
+
+        socket.emit("notice", {name: "Van Thanh", age: 25});
+
+    })
+
+    // locTimer = setInterval(() => {
+    //     socket.emit("UserUpdateLocation", {lat: 10.7900422, lng: 106.6624443})
+    // },3000)
+
+    socket.on("test",(msg) => console.log("test: ", msg));
+    socket.on("notice",(p) => console.log("notice: ", p));
+
+    socket.on("authenticated", (msg) => {
+        console.lgog("authenticated", msg);
+    })
+    socket.on("your_profile",(msg) => console.log("your profile", msg));
+    socket.on("authentication_failed",(msg) => console.log("authentication_failed", msg));
+
+    socket.on("TopicUserLikeRestaurant",(data) => console.log("TopicUserLikeRestaurant", data));
+
+
+    socket.on("disconnect", () => console.log("Socket is disconnected"))
+
+</script>
+</body>
+</html>
