@@ -2,11 +2,15 @@ package main
 
 import (
 	"Food-Delivery/component/appctx"
+	"Food-Delivery/component/tokenprovider/jwt"
 	"Food-Delivery/component/uploadprovider"
 	"Food-Delivery/middleware"
+	userstore "Food-Delivery/module/user/store"
 	"Food-Delivery/pubsub/localpb"
 	"Food-Delivery/routes"
 	"Food-Delivery/subscriber"
+	"context"
+	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	socketio "github.com/googollee/go-socket.io"
@@ -89,6 +93,7 @@ func startSocketIOServer(engine *gin.Engine, appCtx appctx.AppContext) {
 		//s.SetContext("")
 		fmt.Println("Socket connected:", s.ID(), " IP:", s.RemoteAddr())
 
+		s.Join("Shipper")
 		//ticker := time.NewTicker(time.Second)
 		//i := 0
 		//for {
@@ -100,6 +105,12 @@ func startSocketIOServer(engine *gin.Engine, appCtx appctx.AppContext) {
 		return nil
 	})
 
+	//go func() {
+	//	for range time.NewTicker(time.Second).C {
+	//		server.BroadcastToRoom("/", "Shipper", "test", "thanhrain")
+	//	}
+	//}()
+
 	server.OnError("/", func(s socketio.Conn, e error) {
 		fmt.Println("meet error:", e)
 	})
@@ -108,6 +119,43 @@ func startSocketIOServer(engine *gin.Engine, appCtx appctx.AppContext) {
 		fmt.Println("closed", reason)
 	})
 
+	// authenticate
+	server.OnEvent("/", "authenticate", func(s socketio.Conn, token string) {
+		// validate token
+		// If false: s.Close(), and return
+		// If true
+		// => UserID
+		// Fetch db find user by ID
+		// Here: s belongs to who? (user_id)
+		// We need a map[user_id][]socketio.Conn
+
+		db := appCtx.GetMailDBConnection()
+		store := userstore.NewSQLStore(db)
+		tokenProvider := jwt.NewTokenJWTProvider(appCtx.SecretKey())
+		payload, err := tokenProvider.Validate(token)
+		if err != nil {
+			s.Emit("authentication_failed", err.Error())
+			s.Close()
+			return
+		}
+
+		user, err := store.FindUser(context.Background(), map[string]interface{}{"id": payload.UserId})
+		if err != nil {
+			s.Emit("authentication_failed", err.Error())
+			s.Close()
+			return
+		}
+
+		if user.Status == 0 {
+			s.Emit("authentication_failed", errors.New("you has been banned/deleted"))
+			s.Close()
+			return
+		}
+
+		user.Mask(false)
+
+		s.Emit("your_profile", user)
+	})
 	server.OnEvent("/", "test", func(s socketio.Conn, msg string) {
 		log.Println("test: ", msg)
 	})
