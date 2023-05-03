@@ -1,9 +1,9 @@
 package skio
 
 import (
-	"Food-Delivery/component/appctx"
 	"Food-Delivery/component/tokenprovider/jwt"
 	userstore "Food-Delivery/module/user/store"
+	"Food-Delivery/module/user/transport/skuser"
 	"context"
 	"errors"
 	"fmt"
@@ -12,14 +12,21 @@ import (
 	"github.com/googollee/go-socket.io/engineio"
 	"github.com/googollee/go-socket.io/engineio/transport"
 	"github.com/googollee/go-socket.io/engineio/transport/websocket"
+	"gorm.io/gorm"
 	"sync"
 )
+
+type AppContext interface {
+	GetMailDBConnection() *gorm.DB
+	SecretKey() string
+	GetRealTimeEngine() RealTimeEngine
+}
 
 type RealTimeEngine interface {
 	UserSockets(userId int) []AppSocket
 	EmitToRoom(room string, key string, data interface{}) error
 	EmitToUser(userId int, key string, data interface{}) error
-	Run(ctx appctx.AppContext, engine *gin.Engine) error
+	Run(ctx AppContext, engine *gin.Engine) error
 }
 
 type rtEngine struct {
@@ -91,7 +98,7 @@ func (engine *rtEngine) EmitToUser(userId int, key string, data interface{}) err
 	return nil
 }
 
-func (engine *rtEngine) Run(appCtx appctx.AppContext, r *gin.Engine) error {
+func (engine *rtEngine) Run(appCtx AppContext, r *gin.Engine) error {
 	server, err := socketio.NewServer(&engineio.Options{
 		Transports: []transport.Transport{websocket.Default},
 	})
@@ -144,10 +151,13 @@ func (engine *rtEngine) Run(appCtx appctx.AppContext, r *gin.Engine) error {
 
 		user.Mask(false)
 
+		// important: New AppSocket
 		appSck := NewAppSocket(s, user)
 		engine.saveAppSocket(user.Id, appSck)
 
 		s.Emit("authenticated", user)
+
+		server.OnEvent("/", "UserUpdateLocation", skuser.OnUserUpdateLocation(appCtx, user))
 	})
 
 	go server.Serve()

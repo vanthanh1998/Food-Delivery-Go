@@ -22,19 +22,23 @@
 
         socket.emit("notice", {name: "Van Thanh", age: 25});
         // emit token
-        socket.emit("authenticate", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwYXlsb2FkIjp7InVzZXJfaWQiOjEsInJvbGUiOiJ1c2VyIn0sImV4cCI6MTY4NTY3NDMzNSwiaWF0IjoxNjgzMDgyMzM1fQ.0nlA41aN0vjUDZVBKqBLgpK-VXP5pR_OdLNmnic_JEw")
+        socket.emit("authenticate", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwYXlsb2FkIjp7InVzZXJfaWQiOjEsInJvbGUiOiJ1c2VyIn0sImV4cCI6MTY4NTY5NzQ0NCwiaWF0IjoxNjgzMTA1NDQ0fQ.uS0F8KoYZCPECMjV5dp7Bjhs5XQ_2hdw8GjMBMdFymA")
 
     })
-
-    // locTimer = setInterval(() => {
-    //     socket.emit("UserUpdateLocation", {lat: 10.7900422, lng: 106.6624443})
-    // },3000)
 
     socket.on("test",(msg) => console.log("test: ", msg));
     socket.on("notice",(p) => console.log("notice: ", p));
 
     socket.on("authenticated", (msg) => {
         console.log("authenticated", msg);
+
+        if (locTimer != null) {
+            clearInterval(locTimer)
+        }
+
+        locTimer = setInterval(() => {
+            socket.emit("UserUpdateLocation", {lat: 10.7900422, lng: 106.6624443})
+        },3000)
     })
     socket.on("your_profile",(msg) => console.log("your profile", msg));
     socket.on("authentication_failed",(msg) => console.log("authentication_failed", msg));

@@ -81,7 +81,12 @@ func main() {
 	routes.SetupAdminRoute(appContext, v1)
 
 	//startSocketIOServer(r, appContext)
-	skio.NewEngine().Run(appContext, r)
+	//skio.NewEngine().Run(appContext, r)
+	rtEngine := skio.NewEngine()
+	appContext.SetRealTimeEngine(rtEngine)
+
+	_ = rtEngine.Run(appContext, r)
+
 	r.Run() // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
 }
 
