@@ -4,6 +4,7 @@ import (
 	"Food-Delivery/common"
 	usermodel "Food-Delivery/module/user/model"
 	"context"
+	"go.opencensus.io/trace"
 	"gorm.io/gorm"
 )
 
@@ -19,6 +20,9 @@ func (s *sqlStore) FindUser(
 	}
 
 	var user usermodel.User
+
+	_, span := trace.StartSpan(ctx, "store.user.find_user")
+	defer span.End()
 
 	if err := db.Where(conditions).First(&user).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {

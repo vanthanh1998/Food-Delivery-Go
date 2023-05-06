@@ -18,6 +18,9 @@ import (
 	"github.com/googollee/go-socket.io/engineio"
 	"github.com/googollee/go-socket.io/engineio/transport"
 	"github.com/googollee/go-socket.io/engineio/transport/websocket"
+	"go.opencensus.io/exporter/jaeger"
+	"go.opencensus.io/plugin/ochttp"
+	"go.opencensus.io/trace"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"log"
@@ -87,7 +90,20 @@ func main() {
 
 	_ = rtEngine.Run(appContext, r)
 
-	r.Run() // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
+	je, err := jaeger.NewExporter(jaeger.Options{
+		AgentEndpoint: "localhost:6831",
+		Process:       jaeger.Process{ServiceName: "Food-Delivery"},
+	})
+
+	if err != nil {
+		log.Println(err)
+	}
+
+	trace.RegisterExporter(je)
+	trace.ApplyConfig(trace.Config{DefaultSampler: trace.ProbabilitySampler(1)})
+
+	http.ListenAndServe(":8080", &ochttp.Handler{Handler: r})
+	//r.Run() // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
 }
 
 func startSocketIOServer(engine *gin.Engine, appCtx appctx.AppContext) {
