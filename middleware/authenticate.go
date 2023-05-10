@@ -4,12 +4,17 @@ import (
 	"Food-Delivery/common"
 	"Food-Delivery/component/appctx"
 	"Food-Delivery/component/tokenprovider/jwt"
-	userstore "Food-Delivery/module/user/store"
+	usermodel "Food-Delivery/module/user/model"
+	"context"
 	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"strings"
 )
+
+type AuthenticateStore interface {
+	FindUser(ctx context.Context, conditions map[string]interface{}, moreInfo ...string) (*usermodel.User, error)
+}
 
 func ErrWrongAuthHeader(err error) *common.AppError {
 	return common.NewCustomError(
@@ -32,7 +37,7 @@ func extractTokenFromHeaderString(s string) (string, error) {
 // 1. Get token from header
 // 2. Validate token and parse to payload
 // 3. From the token payload, we use user_id find from db
-func RequiredAuth(appCtx appctx.AppContext) gin.HandlerFunc {
+func RequiredAuth(appCtx appctx.AppContext, authStore AuthenticateStore) gin.HandlerFunc {
 	tokenProvider := jwt.NewTokenJWTProvider(appCtx.SecretKey())
 	return func(c *gin.Context) {
 		token, err := extractTokenFromHeaderString(c.GetHeader("Authorization"))
@@ -41,15 +46,18 @@ func RequiredAuth(appCtx appctx.AppContext) gin.HandlerFunc {
 			panic(err)
 		}
 
-		db := appCtx.GetMailDBConnection()
-		store := userstore.NewSQLStore(db)
+		//db := appCtx.GetMailDBConnection()
+		//store := userstore.NewSQLStore(db)
 
 		payload, err := tokenProvider.Validate(token)
 		if err != nil {
 			panic(err)
 		}
 
-		user, err := store.FindUser(c.Request.Context(), map[string]interface{}{"id": payload.UserId})
+		//user, err := store.FindUser(c.Request.Context(), map[string]interface{}{"id": payload.UserId})
+
+		user, err := authStore.FindUser(c.Request.Context(), map[string]interface{}{"id": payload.UserId})
+
 		if err != nil {
 			panic(err)
 		}
