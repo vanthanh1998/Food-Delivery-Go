@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 
 APP_NAME=food-delivery
-DEPLOY_CONNECT=root@g04.200lab.dev
+DEPLOY_CONNECT=root@159.65.137.18
 
 echo "Downloading packages..."
 go mod download
 echo "Compiling..."
-CGO_ENABLED=0 GOOS=windows go build -a -installsuffix cgo -o app
+CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o app
 
 echo "Docker building..."
 docker build -t ${APP_NAME} -f ./Dockerfile .
@@ -15,7 +15,7 @@ docker save -o ${APP_NAME}.tar ${APP_NAME}
 
 echo "Deploying..."
 scp -o  StrictHostKeyChecking=no ./${APP_NAME}.tar ${DEPLOY_CONNECT}:~
-scp -o  StrictHostKeyChecking=no ${DEPLOY_CONNECT} 'bash -s' < ./deploy/stg.sh
+ssh -o  StrictHostKeyChecking=no ${DEPLOY_CONNECT} 'bash -s' < ./deploy/stg.sh
 #
 echo "Cleaning..."
 rm -f ./${APP_NAME}.tar
